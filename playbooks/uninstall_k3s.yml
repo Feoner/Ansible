@@ -6,18 +6,19 @@
     - name: delete everything
       ansible.builtin.command:
         argv: 
-          - kubectl delete daemonsets,replicasets,services,deployments,pods,rc,ingress
+          - /usr/bin/kubectl
+          - delete
+          - daemonsets
+          - replicasets
+          - services
+          - deployments
+          - pods
+          - rc
+          - ingress
           - --all 
           - --all-namespaces
-    #- name: Stop k3s service
-    #  systemd:
-    #    name: k3s
-    #    state: stopped
-    #    enabled: no
     - name: Run K3s Uninstall script server
       ansible.builtin.command: /usr/local/bin/k3s-uninstall.sh
-      #  cmd: k3s-uninstall.sh
-      #  removes: /var/lib/rancher/k3s/*
     - name: Get k3s reference
       ansible.builtin.command: which k3s
       register: k3s_path
@@ -37,15 +38,6 @@
   hosts: agent
   become: true
   tasks:
-   # - name: delete everything
-   #   ansible.builtin.command:
-   #     cmd:  kubectl delete,daemonsets,replicasets,services,deployments,pods,rc,ingress all --all --all-namespaces
-    #  cmd: kubectl delete daemonsets,replicasets,services,deployments,pods,rc,ingress --all --all-namespaces
-    #- name: Stop k3s service
-    #  systemd:
-    #    name: k3s
-    #    state: stopped
-    #    enabled: no
     - name: Run K3s Uninstall script [agent]
       ansible.builtin.command:
         cmd: /usr/local/bin/k3s-agent-uninstall.sh
