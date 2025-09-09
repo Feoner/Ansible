@@ -1,0 +1,65 @@
+---
+- name: Run HardeningKitty on Windows Servers
+  hosts: windows_servers
+  gather_facts: no
+  vars:
+    hardeningkitty_dir: "C:\\HardeningKitty"
+    hardeningkitty_url: "https://raw.githubusercontent.com/0x6d69636b/HardeningKitty/main/HardeningKitty.psm1"
+    finding_list_base_url: "https://raw.githubusercontent.com/0x6d69636b/HardeningKitty/main/lists"
+  tasks:
+
+    - name: Create HardeningKitty directory
+      win_file:
+        path: "{{ hardeningkitty_dir }}"
+        state: directory
+
+    - name: Get Windows version
+      win_shell: |
+        (Get-CimInstance Win32_OperatingSystem).Caption
+      register: win_version
+    - name: Get Domain Role
+      win_shell: |
+        (Get-WmiObject Win32_ComputerSystem).DomainRole
+      register: domain_role
+
+    - name: Set finding list based on role and version
+      set_fact:
+        finding_list_file: >-
+          {{
+            'windows_server_2022_dc.csv' if '2022' in win_version.stdout and domain_role.stdout|int in [4,5] else
+            'windows_server_2022_member.csv' if '2022' in win_version.stdout else
+            'windows_server_2019_dc.csv' if '2019' in win_version.stdout and domain_role.stdout|int in [4,5] else
+            'windows_server_2019_member.csv' if '2019' in win_version.stdout else
+            'windows_server_2016_dc.csv' if '2016' in win_version.stdout and domain_role.stdout|int in [4,5] else
+            'windows_server_2016_member.csv' if '2016' in win_version.stdout else
+            'windows_server_2012_dc.csv' if '2012' in win_version.stdout and domain_role.stdout|int in [4,5] else
+            'windows_server_2012_member.csv'
+          }}
+
+    - name: Download HardeningKitty.psm1 if not present
+      win_get_url:
+        url: "{{ hardeningkitty_url }}"
+        dest: "{{ hardeningkitty_dir }}\\HardeningKitty.psm1"
+        force: no
+
+    - name: Download finding list
+      win_get_url:
+        url: "{{ finding_list_base_url }}/{{ finding_list_file }}"
+        dest: "{{ hardeningkitty_dir }}\\{{ finding_list_file }}"
+        force: yes
+
+    - name: Import HardeningKitty module
+      win_shell: |
+        Import-Module "{{ hardeningkitty_dir }}\\HardeningKitty.psm1"
+
+    - name: Run HardeningKitty Audit
+      win_shell: |
+        Invoke-HardeningKitty -Mode Audit -Report -ReportFile "{{ hardeningkitty_dir }}\\audit_report.csv" -FileFindingList "{{ hardeningkitty_dir }}\\{{ finding_list_file }}"
+
+    - name: Backup current settings
+      win_shell: |
+        Invoke-HardeningKitty -Mode Config -Backup -BackupFile "{{ hardeningkitty_dir }}\\backup_{{ ansible_date_time.iso8601 }}.csv" -FileFindingList "{{ hardeningkitty_dir }}\\{{ finding_list_file }}"
+
+    - name: Apply recommended fixes (HailMary)
+      win_shell: |
+        Invoke-HardeningKitty -Mode HailMary -FileFindingList "{{ hardeningkitty_dir }}\\{{ finding_list_file }}" -Log -Report
