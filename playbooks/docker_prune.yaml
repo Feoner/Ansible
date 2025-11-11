@@ -1,0 +1,20 @@
+---
+- name: Prune unused Docker resources
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Prune unused Docker containers, networks, images, and cache
+      ansible.builtin.command: docker system prune -af
+      register: prune_output
+
+    - name: Prune unused Docker volumes
+      ansible.builtin.command: docker volume prune -f
+      register: volume_prune_output
+
+    - name: Show system prune output
+      ansible.builtin.debug:
+        var: prune_output.stdout
+
+    - name: Show volume prune output
+      ansible.builtin.debug:
+        var: volume_prune_output.stdout
