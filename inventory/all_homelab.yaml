@@ -1,0 +1,44 @@
+all:
+  children:
+    proxmox:
+      children:
+        pve1_group:
+          hosts:
+            pve1:
+              ansible_host: 192.168.1.2
+              ansible_user: root
+            traefik_lxc:
+              ansible_host: 192.168.1.199
+              ansible_user: ansible
+            docker:
+              ansible_host: 192.168.1.173
+              ansible_user: ansible
+        pve2_group:
+          hosts:
+            pve2:
+              ansible_host: 192.168.1.3
+              ansible_user: root
+            n8n:
+              ansible_host: 192.168.1.204
+              ansible_user: ansible
+            semaphore:
+              ansible_host: 192.168.1.208
+              ansible_user: ansible
+            docker2:
+              ansible_host: 192.168.1.203
+              ansible_user: ansible
+
+    opnsense:
+      hosts:
+        opnsense:
+          ansible_host: 192.168.1.1
+          ansible_user: root
+
+    k3s:
+      hosts:
+        westeros:
+          ansible_host: 192.168.1.200
+          ansible_user: ansible
+        gondor:
+          ansible_host: 192.168.1.201
+          ansible_user: ansible
