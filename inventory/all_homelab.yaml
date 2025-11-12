@@ -10,9 +10,9 @@ all:
             traefik_lxc:
               ansible_host: 192.168.1.199
               ansible_user: ansible
-            docker:
-              ansible_host: 192.168.1.173
-              ansible_user: ansible
+            #docker:
+              #ansible_host: 192.168.1.173
+              #ansible_user: ansible
         pve2_group:
           hosts:
             pve2:
@@ -24,9 +24,9 @@ all:
             semaphore:
               ansible_host: 192.168.1.208
               ansible_user: ansible
-            docker2:
-              ansible_host: 192.168.1.203
-              ansible_user: ansible
+            #docker2:
+             # ansible_host: 192.168.1.203
+             # ansible_user: ansible
 
     opnsense:
       hosts:
