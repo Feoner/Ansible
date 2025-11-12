@@ -32,7 +32,7 @@ all:
       hosts:
         opnsense:
           ansible_host: 192.168.1.1
-          ansible_user: ansible
+          ansible_user: root
 
     k3s:
       hosts:
